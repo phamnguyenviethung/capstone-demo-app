@@ -30,6 +30,7 @@ export interface FloorPlanConfig {
   boothIds: string[];
   title?: string;
   description?: string;
+  filteredBoothIds?: string[];
 }
 
 export interface BoothInteractionHandlers {
@@ -43,6 +44,10 @@ export interface FloorPlanProps {
   boothData: Record<string, BoothData>;
   onBoothClick: (boothId: string) => void;
   className?: string;
+  selectedStatuses?: BoothStatus[];
+  onStatusToggle?: (status: BoothStatus) => void;
+  onClearFilters?: () => void;
+  boothCounts?: Record<BoothStatus, number>;
 }
 
 export interface BoothDetailProps {
