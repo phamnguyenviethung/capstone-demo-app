@@ -39,6 +39,14 @@ export interface FloorData {
   name: string;
 }
 
+export interface FloorPlanData {
+  floor: number;
+  name: string;
+  svgPath: string;
+  boothIds: string[];
+  booths: Record<string, BoothData>;
+}
+
 export interface BoothInteractionHandlers {
   onBoothClick: (boothId: string) => void;
   onBoothHover?: (boothId: string) => void;
