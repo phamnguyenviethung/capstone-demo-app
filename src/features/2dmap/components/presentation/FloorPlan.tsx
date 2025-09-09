@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ReactSVG } from 'react-svg';
-import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { X, Building2, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { FloorPlanProps, BoothStatus } from '../../types';
 import { getBoothColor, getStatusColor } from '../../data/utils';
 
@@ -76,111 +75,187 @@ export const FloorPlan: React.FC<FloorPlanProps> = ({
 
   const statusOptions: BoothStatus[] = ['Available', 'Occupied', 'Reserved'];
   const hasActiveFilters = selectedStatuses.length > 0;
+  const [showFloors, setShowFloors] = useState(false);
+  const floorDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Floor navigation functions
+  const currentFloorIndex = floors.findIndex(f => f.floor === selectedFloor);
+  const canGoPrevious = currentFloorIndex > 0;
+  const canGoNext = currentFloorIndex < floors.length - 1;
+
+  const handlePreviousFloor = () => {
+    if (canGoPrevious && onFloorChange) {
+      onFloorChange(floors[currentFloorIndex - 1].floor);
+    }
+  };
+
+  const handleNextFloor = () => {
+    if (canGoNext && onFloorChange) {
+      onFloorChange(floors[currentFloorIndex + 1].floor);
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (floorDropdownRef.current && !floorDropdownRef.current.contains(event.target as Node)) {
+        setShowFloors(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
-    <div className={`bg-background rounded-xl shadow-sm ${className}`}>
-      {/* Header */}
-      <div className="px-4 pt-4 pb-3">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-2 h-2 bg-primary rounded-full"></div>
-          <h2 className="text-lg font-semibold text-foreground">
+    <div className={`bg-background rounded-lg shadow-sm ${className}`}>
+      {/* Compact Header */}
+      <div className="px-3 pt-3 pb-2">
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
+          <h2 className="text-base font-semibold text-foreground">
             {config.title || 'Floor Plan'}
           </h2>
         </div>
-        <p className="text-sm text-muted-foreground">
-          {config.description || 'Interactive floor plan - click to select booths'}
-        </p>
+        {config.description && (
+          <p className="text-xs text-muted-foreground mt-1 leading-tight">
+            {config.description}
+          </p>
+        )}
       </div>
       
-      {/* Controls Section */}
+      {/* Ultra Compact Controls */}
       {(floors.length > 1 || onStatusToggle) && (
-        <div className="px-4 pb-3 border-b border-border/50">
-          {/* Floor Selection */}
-          {floors.length > 1 && onFloorChange && selectedFloor !== undefined && (
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-foreground">Floor Selection</span>
-              </div>
-              
-              <div className="flex flex-wrap gap-2">
-                {floors.map((floor) => (
-                  <button
-                    key={floor.floor}
-                    onClick={() => onFloorChange(floor.floor)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                      selectedFloor === floor.floor
-                        ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-600/20'
-                        : 'bg-secondary/50 text-secondary-foreground hover:bg-secondary hover:shadow-sm'
-                    }`}
-                  >
-                    <div className={`w-2 h-2 rounded-full ${
-                      selectedFloor === floor.floor ? 'bg-white/80' : 'bg-primary/60'
-                    }`} />
-                    <span>{floor.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+        <div className="px-3 py-2 border-b border-border/50">
+          <div className="flex items-center justify-between gap-3">
+            {/* Floor Selection with Navigation */}
+            {floors.length > 1 && onFloorChange && selectedFloor !== undefined && (
+              <div className="flex items-center gap-1">
+                {/* Previous Floor Button */}
+                <button
+                  onClick={handlePreviousFloor}
+                  disabled={!canGoPrevious}
+                  className={`p-1.5 rounded-md transition-all ${
+                    canGoPrevious 
+                      ? 'bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground' 
+                      : 'bg-secondary/20 text-muted-foreground/40 cursor-not-allowed'
+                  }`}
+                  title="Previous floor"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </button>
 
-          {/* Status Filters */}
-          {onStatusToggle && (
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-foreground">Status Filters</span>
-                {hasActiveFilters && onClearFilters && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onClearFilters}
-                    className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                {/* Floor Selector Dropdown */}
+                <div className="relative" ref={floorDropdownRef}>
+                  <button
+                    onClick={() => setShowFloors(!showFloors)}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-secondary/50 hover:bg-secondary rounded-md transition-all text-sm"
                   >
-                    <X className="h-3 w-3 mr-1" />
-                    Clear
-                  </Button>
+                    <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="font-medium">
+                      {floors.find(f => f.floor === selectedFloor)?.name || `Floor ${selectedFloor}`}
+                    </span>
+                    <ChevronDown className={`h-3 w-3 text-muted-foreground transition-transform ${
+                      showFloors ? 'rotate-180' : ''
+                    }`} />
+                  </button>
+                  
+                  {showFloors && (
+                    <div className="absolute top-full left-0 mt-1 bg-background border border-border rounded-md shadow-lg z-10 min-w-[130px]">
+                      {floors.map((floor) => (
+                        <button
+                          key={floor.floor}
+                          onClick={() => {
+                            onFloorChange(floor.floor);
+                            setShowFloors(false);
+                          }}
+                          className={`flex items-center gap-2 w-full px-2.5 py-1.5 text-left hover:bg-secondary/50 first:rounded-t-md last:rounded-b-md text-sm ${
+                            selectedFloor === floor.floor ? 'bg-primary/10 text-primary' : ''
+                          }`}
+                        >
+                          <div className={`w-1.5 h-1.5 rounded-full ${
+                            selectedFloor === floor.floor ? 'bg-primary' : 'bg-muted-foreground/40'
+                          }`} />
+                          <span>{floor.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Next Floor Button */}
+                <button
+                  onClick={handleNextFloor}
+                  disabled={!canGoNext}
+                  className={`p-1.5 rounded-md transition-all ${
+                    canGoNext 
+                      ? 'bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground' 
+                      : 'bg-secondary/20 text-muted-foreground/40 cursor-not-allowed'
+                  }`}
+                  title="Next floor"
+                >
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+
+            {/* Status Filters - Horizontal List */}
+            {onStatusToggle && (
+              <div className="flex items-center gap-2">
+                {/* Status Filter Buttons - Always Visible */}
+                <div className="flex items-center gap-1">
+                  {statusOptions.map((status) => {
+                    const isSelected = selectedStatuses.includes(status);
+                    const count = boothCounts[status] || 0;
+                    const statusColor = getStatusColor(status);
+                    
+                    return (
+                      <button
+                        key={status}
+                        onClick={() => onStatusToggle(status)}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                          isSelected 
+                            ? 'bg-primary text-primary-foreground shadow-sm' 
+                            : 'bg-secondary/50 hover:bg-secondary text-secondary-foreground'
+                        }`}
+                        title={`${status} (${count})`}
+                      >
+                        <div 
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: statusColor }}
+                        />
+                        <span className="hidden sm:inline">{status}</span>
+                        <span className={`px-1 py-0.5 rounded text-xs font-bold ${
+                          isSelected 
+                            ? 'bg-primary-foreground/20 text-primary-foreground' 
+                            : 'bg-muted/70 text-muted-foreground'
+                        }`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Clear Filters */}
+                {hasActiveFilters && onClearFilters && (
+                  <button
+                    onClick={onClearFilters}
+                    className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+                    title="Clear filters"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
                 )}
               </div>
-              
-              <div className="flex flex-wrap gap-2">
-                {statusOptions.map((status) => {
-                  const isSelected = selectedStatuses.includes(status);
-                  const count = boothCounts[status] || 0;
-                  const statusColor = getStatusColor(status);
-                  
-                  return (
-                    <button
-                      key={status}
-                      onClick={() => onStatusToggle(status)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                        isSelected 
-                          ? 'bg-primary text-primary-foreground shadow-sm' 
-                          : 'bg-secondary/50 text-secondary-foreground hover:bg-secondary'
-                      }`}
-                    >
-                      <div 
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: statusColor }}
-                      />
-                      <span>{status}</span>
-                      <span className={`px-1.5 py-0.5 rounded-md text-xs font-semibold ${
-                        isSelected 
-                          ? 'bg-primary-foreground/20 text-primary-foreground' 
-                          : 'bg-background text-muted-foreground'
-                      }`}>
-                        {count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
 
       {/* SVG Floor Plan */}
-      <div className="px-4 pb-4">
-        <div className="relative bg-secondary/20 rounded-lg overflow-hidden max-h-[60vh] lg:max-h-[70vh] p-4">
+      <div className="px-3 pb-3">
+        <div className="relative bg-secondary/20 rounded-md overflow-hidden max-h-[65vh] lg:max-h-[75vh] p-3">
           <ReactSVG
             src={config.svgSource}
             className="w-full h-full"
