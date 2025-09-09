@@ -33,6 +33,12 @@ export interface FloorPlanConfig {
   filteredBoothIds?: string[];
 }
 
+export interface FloorData {
+  floor: number;
+  svgSource: string;
+  name: string;
+}
+
 export interface BoothInteractionHandlers {
   onBoothClick: (boothId: string) => void;
   onBoothHover?: (boothId: string) => void;
@@ -48,6 +54,9 @@ export interface FloorPlanProps {
   onStatusToggle?: (status: BoothStatus) => void;
   onClearFilters?: () => void;
   boothCounts?: Record<BoothStatus, number>;
+  floors?: FloorData[];
+  selectedFloor?: number;
+  onFloorChange?: (floor: number) => void;
 }
 
 export interface BoothDetailProps {
@@ -59,7 +68,7 @@ export interface BoothDetailProps {
 export interface MapContainerProps {
   boothData: Record<string, BoothData>;
   boothIds: string[];
-  svgSource: string;
+  floors?: FloorData[];
   title?: string;
   description?: string;
 }

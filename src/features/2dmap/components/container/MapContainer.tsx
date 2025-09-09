@@ -1,16 +1,50 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import type { MapContainerProps } from '../../types';
-import { useBoothData, useBoothSelection, useBoothFiltering } from '../../hooks';
+import {
+  useBoothData,
+  useBoothSelection,
+  useBoothFiltering,
+} from '../../hooks';
 import { FloorPlan, BoothDetail } from '../presentation';
+import f1Svg from '@/assets/f1.svg';
+import f2Svg from '@/assets/f2.svg';
+
+const DEFAULT_FLOORS = [
+  { floor: 1, svgSource: f1Svg, name: 'Floor 1' },
+  { floor: 2, svgSource: f2Svg, name: 'Floor 2' },
+];
 
 export const MapContainer: React.FC<MapContainerProps> = ({
   boothData,
   boothIds,
-  svgSource,
+  floors = DEFAULT_FLOORS,
   title,
   description,
 }) => {
-  const { getBoothById, allBooths } = useBoothData({ boothData, boothIds });
+  const [selectedFloor, setSelectedFloor] = useState<number>(
+    floors[0]?.floor || 1
+  );
+
+  const currentFloorData = useMemo(
+    () => floors.find((floor) => floor.floor === selectedFloor) || floors[0],
+    [floors, selectedFloor]
+  );
+
+  const currentFloorBooths = useMemo(
+    () =>
+      Object.values(boothData).filter((booth) => booth.floor === selectedFloor),
+    [boothData, selectedFloor]
+  );
+
+  const currentFloorBoothIds = useMemo(
+    () => boothIds.filter((id) => boothData[id]?.floor === selectedFloor),
+    [boothIds, boothData, selectedFloor]
+  );
+
+  const { getBoothById } = useBoothData({
+    boothData,
+    boothIds: currentFloorBoothIds,
+  });
   const { selectedBooth, selectBooth, clearSelection } = useBoothSelection();
   const {
     selectedStatuses,
@@ -18,7 +52,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     boothCountsByStatus,
     toggleStatus,
     clearFilters,
-  } = useBoothFiltering({ allBooths });
+  } = useBoothFiltering({ allBooths: currentFloorBooths });
 
   const handleBoothClick = (boothId: string) => {
     const booth = getBoothById(boothId);
@@ -28,8 +62,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   };
 
   const floorPlanConfig = {
-    svgSource,
-    boothIds,
+    svgSource: currentFloorData.svgSource,
+    boothIds: currentFloorBoothIds,
     title,
     description,
     filteredBoothIds,
@@ -38,10 +72,10 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-2 sm:p-3">
       <div className="max-w-7xl mx-auto">
-        {/* Compact 2-column layout */}
-        <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-4">
-          {/* Floor Plan with integrated filter - Takes main area */}
-          <div className="lg:col-span-2">
+        {/* Responsive layout */}
+        <div className="flex flex-col xl:grid xl:grid-cols-4 gap-4">
+          {/* Floor Plan with integrated controls - Main area */}
+          <div className="xl:col-span-3">
             <FloorPlan
               config={floorPlanConfig}
               boothData={boothData}
@@ -50,12 +84,15 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               onStatusToggle={toggleStatus}
               onClearFilters={clearFilters}
               boothCounts={boothCountsByStatus}
+              floors={floors}
+              selectedFloor={selectedFloor}
+              onFloorChange={setSelectedFloor}
             />
           </div>
 
-          {/* Detail Panel - Right sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-2">
+          {/* Detail Panel - Sidebar */}
+          <div className="xl:col-span-1">
+            <div className="sticky top-4">
               <BoothDetail booth={selectedBooth} onClose={clearSelection} />
             </div>
           </div>

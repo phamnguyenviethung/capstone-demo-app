@@ -14,6 +14,9 @@ export const FloorPlan: React.FC<FloorPlanProps> = ({
   onStatusToggle,
   onClearFilters,
   boothCounts = { Available: 0, Occupied: 0, Reserved: 0 },
+  floors = [],
+  selectedFloor,
+  onFloorChange,
 }) => {
   const handleSVGInjection = (svg: SVGSVGElement) => {
     svg.style.width = '100%';
@@ -89,56 +92,89 @@ export const FloorPlan: React.FC<FloorPlanProps> = ({
         </p>
       </div>
       
-      {/* Filter Section */}
-      {onStatusToggle && (
-        <div className="px-4 pb-3">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-foreground">Status Filters</span>
-            {hasActiveFilters && onClearFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClearFilters}
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-              >
-                <X className="h-3 w-3 mr-1" />
-                Clear
-              </Button>
-            )}
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            {statusOptions.map((status) => {
-              const isSelected = selectedStatuses.includes(status);
-              const count = boothCounts[status] || 0;
-              const statusColor = getStatusColor(status);
+      {/* Controls Section */}
+      {(floors.length > 1 || onStatusToggle) && (
+        <div className="px-4 pb-3 border-b border-border/50">
+          {/* Floor Selection */}
+          {floors.length > 1 && onFloorChange && selectedFloor !== undefined && (
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-foreground">Floor Selection</span>
+              </div>
               
-              return (
-                <button
-                  key={status}
-                  onClick={() => onStatusToggle(status)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    isSelected 
-                      ? 'bg-primary text-primary-foreground shadow-sm' 
-                      : 'bg-secondary/50 text-secondary-foreground hover:bg-secondary'
-                  }`}
-                >
-                  <div 
-                    className="w-2.5 h-2.5 rounded-full"
-                    style={{ backgroundColor: statusColor }}
-                  />
-                  <span>{status}</span>
-                  <span className={`px-1.5 py-0.5 rounded-md text-xs font-semibold ${
-                    isSelected 
-                      ? 'bg-primary-foreground/20 text-primary-foreground' 
-                      : 'bg-background text-muted-foreground'
-                  }`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+              <div className="flex flex-wrap gap-2">
+                {floors.map((floor) => (
+                  <button
+                    key={floor.floor}
+                    onClick={() => onFloorChange(floor.floor)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                      selectedFloor === floor.floor
+                        ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-600/20'
+                        : 'bg-secondary/50 text-secondary-foreground hover:bg-secondary hover:shadow-sm'
+                    }`}
+                  >
+                    <div className={`w-2 h-2 rounded-full ${
+                      selectedFloor === floor.floor ? 'bg-white/80' : 'bg-primary/60'
+                    }`} />
+                    <span>{floor.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Status Filters */}
+          {onStatusToggle && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-foreground">Status Filters</span>
+                {hasActiveFilters && onClearFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onClearFilters}
+                    className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Clear
+                  </Button>
+                )}
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                {statusOptions.map((status) => {
+                  const isSelected = selectedStatuses.includes(status);
+                  const count = boothCounts[status] || 0;
+                  const statusColor = getStatusColor(status);
+                  
+                  return (
+                    <button
+                      key={status}
+                      onClick={() => onStatusToggle(status)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                        isSelected 
+                          ? 'bg-primary text-primary-foreground shadow-sm' 
+                          : 'bg-secondary/50 text-secondary-foreground hover:bg-secondary'
+                      }`}
+                    >
+                      <div 
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ backgroundColor: statusColor }}
+                      />
+                      <span>{status}</span>
+                      <span className={`px-1.5 py-0.5 rounded-md text-xs font-semibold ${
+                        isSelected 
+                          ? 'bg-primary-foreground/20 text-primary-foreground' 
+                          : 'bg-background text-muted-foreground'
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
