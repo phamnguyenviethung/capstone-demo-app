@@ -6,12 +6,10 @@ import {
   useBoothFiltering,
 } from '../../hooks';
 import { FloorPlan, BoothDetail } from '../presentation';
-import f1Svg from '@/assets/f1.svg';
-import f2Svg from '@/assets/f2.svg';
 
 const DEFAULT_FLOORS = [
-  { floor: 1, svgSource: f1Svg, name: 'Floor 1' },
-  { floor: 2, svgSource: f2Svg, name: 'Floor 2' },
+  { floor: 1, svgSource: '/f1.svg', name: 'Floor 1' },
+  { floor: 2, svgSource: '/f2.svg', name: 'Floor 2' },
 ];
 
 export const MapContainer: React.FC<MapContainerProps> = ({

@@ -12,7 +12,7 @@ export const FLOOR_PLANS: FloorPlanData[] = [
   {
     floor: 1,
     name: 'Ground Floor',
-    svgPath: '/src/assets/f1.svg',
+    svgPath: '/f1.svg',
     boothIds: ['rec-1', 'rec-2', 'rec-3', 'rec-4', 'rec-5'],
     booths: {
       'rec-1': {
@@ -47,7 +47,12 @@ export const FLOOR_PLANS: FloorPlanData[] = [
         rating: '4.7',
         hours: '10:00 AM - 9:00 PM',
         floor: 1,
-        features: ['Air Conditioning', 'WiFi', 'Security System', '24/7 Access'],
+        features: [
+          'Air Conditioning',
+          'WiFi',
+          'Security System',
+          '24/7 Access',
+        ],
       },
       'rec-3': {
         id: 'rec-3',
@@ -98,14 +103,19 @@ export const FLOOR_PLANS: FloorPlanData[] = [
         rating: '4.7',
         hours: '10:00 AM - 9:00 PM',
         floor: 1,
-        features: ['Air Conditioning', 'WiFi', 'Security System', '24/7 Access'],
+        features: [
+          'Air Conditioning',
+          'WiFi',
+          'Security System',
+          '24/7 Access',
+        ],
       },
     },
   },
   {
     floor: 2,
     name: 'Second Floor',
-    svgPath: '/src/assets/f2.svg',
+    svgPath: '/f2.svg',
     boothIds: ['rec-6', 'rec-7', 'rec-8', 'rec-9', 'rec-10'],
     booths: {
       'rec-6': {
@@ -140,7 +150,13 @@ export const FLOOR_PLANS: FloorPlanData[] = [
         rating: '4.5',
         hours: '10:00 AM - 9:00 PM',
         floor: 2,
-        features: ['Air Conditioning', 'WiFi', 'Security System', '24/7 Access', 'Storage Room'],
+        features: [
+          'Air Conditioning',
+          'WiFi',
+          'Security System',
+          '24/7 Access',
+          'Storage Room',
+        ],
       },
       'rec-8': {
         id: 'rec-8',
@@ -174,7 +190,12 @@ export const FLOOR_PLANS: FloorPlanData[] = [
         rating: '4.0',
         hours: '10:00 AM - 9:00 PM',
         floor: 2,
-        features: ['Air Conditioning', 'WiFi', 'Security System', 'Tech Support Area'],
+        features: [
+          'Air Conditioning',
+          'WiFi',
+          'Security System',
+          'Tech Support Area',
+        ],
       },
       'rec-10': {
         id: 'rec-10',
@@ -191,7 +212,12 @@ export const FLOOR_PLANS: FloorPlanData[] = [
         rating: '4.6',
         hours: '10:00 AM - 9:00 PM',
         floor: 2,
-        features: ['Air Conditioning', 'WiFi', 'Kitchen Equipment', 'Exhaust System'],
+        features: [
+          'Air Conditioning',
+          'WiFi',
+          'Kitchen Equipment',
+          'Exhaust System',
+        ],
       },
     },
   },
@@ -199,24 +225,28 @@ export const FLOOR_PLANS: FloorPlanData[] = [
 
 // Helper functions to maintain backward compatibility
 export const getAllBoothIds = (): string[] => {
-  return FLOOR_PLANS.flatMap(floor => floor.boothIds);
+  return FLOOR_PLANS.flatMap((floor) => floor.boothIds);
 };
 
 export const getAllBoothData = (): Record<string, BoothData> => {
   const allBooths: Record<string, BoothData> = {};
-  FLOOR_PLANS.forEach(floor => {
+  FLOOR_PLANS.forEach((floor) => {
     Object.assign(allBooths, floor.booths);
   });
   return allBooths;
 };
 
-export const getBoothsByFloor = (floorNumber: number): Record<string, BoothData> => {
-  const floor = FLOOR_PLANS.find(f => f.floor === floorNumber);
+export const getBoothsByFloor = (
+  floorNumber: number
+): Record<string, BoothData> => {
+  const floor = FLOOR_PLANS.find((f) => f.floor === floorNumber);
   return floor ? floor.booths : {};
 };
 
-export const getFloorByNumber = (floorNumber: number): FloorPlanData | undefined => {
-  return FLOOR_PLANS.find(f => f.floor === floorNumber);
+export const getFloorByNumber = (
+  floorNumber: number
+): FloorPlanData | undefined => {
+  return FLOOR_PLANS.find((f) => f.floor === floorNumber);
 };
 
 // Backward compatibility exports
